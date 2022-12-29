@@ -60,17 +60,21 @@ module.exports = {
 			}, datafind);
 			console.log(datafind.indexes);
 			if (datafind.indexes.length == 0){
-				return interaction.reply('No Results found, Please make sure you have spelled the name of the pokemon correctly. You can manually check the sheet by visiting:  https://docs.google.com/spreadsheets/d/1rkzDRWp6TOUZg1Cf2u7aVRaiksiawVt5bCekgvYHMiA/edit#gid=0 ')
+				return interaction.reply('No Results found, Please make sure you have spelled the name of the pokemon correctly. You can manually check the sheet by visiting:  https://docs.google.com/spreadsheets/d/1bMaLkMyy4cs7O5RXLNMS95xPtVz-FVhUB_Q-4B9a-UE/edit?usp=sharing')
 			}
 			else
 			{
+				var response = ""
 				for (var i = 0; i < datafind.indexes.length; i++){
 					var ind = datafind.indexes[i];
 					if (data.Strategy[ind] == null ){
 						data.Strategy[ind] = "N/A"
 					};
-					return interaction.reply(`This Pokemon is rated in Tier: ${data.Grade[ind]}\n\nYour ${data.Role[ind]} ${data.BuildType[ind]} Build is: \n\n${data.Pokemon[ind]} @ ${data.HeldItem[ind]}\nAbility: ${data.Ability[ind]}\nLevel: 100\nTera Type: ${data.TeraType[ind]}\nEVs: ${(data.EVs[ind].split('\n'))[0]} / ${(data.EVs[ind].split('\n'))[1]} / ${(data.EVs[ind].split('\n'))[2]}\n${data.Nature[ind]} Nature\n- ${data.MoveSets[ind].split('\n')[0]}\n- ${data.MoveSets[ind].split('\n')[1]}\n- ${data.MoveSets[ind].split('\n')[2]}\n- ${data.MoveSets[ind].split('\n')[3]}\n\nYou can ignore the Following IVs when training this Pokemon: ${data.IgnoreIv[ind]}\n\nStrategy and Build Notes:\n${data.Strategy[ind]}`);
+					let IgnoreIvs = data.IgnoreIv[ind].replace("/", ", ").replace("SP", "Speed").replace("AT", "Attack").replace("SA", "Special Attack").replace(/\/$/, "");
+					
+					var response = response + `This Pokemon is rated in Tier: ${data.Grade[ind]}\n\nYour ${data.Role[ind]} ${data.BuildType[ind]} Build is: \n\n${data.Pokemon[ind]} @ ${data.HeldItem[ind]}\nAbility: ${data.Ability[ind]}\nLevel: 100\nTera Type: ${data.TeraType[ind]}\nEVs: ${(data.EVs[ind].split('\n'))[0]} / ${(data.EVs[ind].split('\n'))[1]} / ${(data.EVs[ind].split('\n'))[2]}\n${data.Nature[ind]} Nature\n- ${data.MoveSets[ind].split('\n')[0]}\n- ${data.MoveSets[ind].split('\n')[1]}\n- ${data.MoveSets[ind].split('\n')[2]}\n- ${data.MoveSets[ind].split('\n')[3]}\n\nYou can ignore the Following IVs when training this Pokemon:\n${IgnoreIvs}\n\nStrategy and Build Notes:\n${data.Strategy[ind]}\n -----------------------------------------------\n`;
 				}
+				return interaction.reply(response)
 			}
 		});
 	},
