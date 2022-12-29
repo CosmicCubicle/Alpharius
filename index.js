@@ -18,6 +18,62 @@ const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
+const {google} = require('googleapis');
+const auth = new google.auth.GoogleAuth({
+	keyFile: "keys.json", //the key file
+	//url to spreadsheets API
+	scopes: "https://www.googleapis.com/auth/spreadsheets", 
+});
+const sheets = google.sheets({ version: 'v4', auth });
+const { sheetId } = require('./config.json');
+
+global.builddata = {};
+function getBuildData() {
+	sheets.spreadsheets.values.get({
+		spreadsheetId: sheetId,
+		range: 'Raid Builds!B2:S',
+	},
+	(err, res) => {
+		if (err) return console.log("The API returned an error: " + err);
+		let data = {
+			BuildType : [],
+			EventBuild : [],
+			Role : [],
+			Grade : [],
+			Pokemon : [],
+			HeldItem : [],
+			Ability : [],
+			TeraType : [],
+			Nature : [],
+			IgnoreIv : [],
+			EVs : [],
+			MoveSets : [],
+			Strategy : []
+		}
+		const rows = res.data.values;
+		rows.map((row) => {
+			data.BuildType.push(row[0]);
+			data.EventBuild.push(row[3]);
+			data.Role.push(row[1]);
+			data.Grade.push(row[2]);
+			data.Pokemon.push(row[7]);
+			data.HeldItem.push(row[10]);
+			data.Ability.push(row[11]);
+			data.TeraType.push(row[12]);
+			data.Nature.push(row[13]);
+			data.IgnoreIv.push(row[14]);
+			data.EVs.push(row[15]);
+			data.MoveSets.push(row[16]);
+			data.Strategy.push(row[17]);
+		});
+		builddata = data;
+		//console.log(builddata);
+	});
+};
+
+setInterval(getBuildData, 60000);
+getBuildData();
+
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
@@ -39,44 +95,6 @@ for (const file of eventFiles) {
 	}
 }
 
-client.on('messageCreate', async message => {
-	if (message.author.bot) return;
-	// let args;
-	// Single word deletes
-	if (config.SingleWordMessage.indexOf(message.content.toLowerCase()) > -1) {
-		message.delete();
-		console.log(message.content);
-		console.log(message.author.username);
-		return;
-	}
-	// Banned words deletes
-	for (let i = 0; i < config.BannedWords.length; i++) {
-		if (message.content.toLowerCase().includes(config.BannedWords[i])) {
-			message.delete();
-			message.channel.send('You have used a banned word. Message Purged!');
-			return;
-		}
-	}
-});
 
-client.on('messageUpdate', async (old, message) => {
-	if (message.author.bot) return;
-	// let args;
-	// Single word deletes
-	if (config.SingleWordMessage.indexOf(message.content.toLowerCase()) > -1) {
-		message.delete();
-		console.log(message.content);
-		console.log(message.author.username);
-		return;
-	}
-	// Banned words deletes
-	for (let i = 0; i < config.BannedWords.length; i++) {
-		if (message.content.toLowerCase().includes(config.BannedWords[i])) {
-			message.delete();
-			message.channel.send('You have used a banned word. Message Purged!');
-			return;
-		}
-	}
-});
 
 client.login(token);
